@@ -1,2 +1,4 @@
 env
 credentials
+.env
+transcript.txt
