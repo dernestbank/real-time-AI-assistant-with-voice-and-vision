@@ -4,7 +4,6 @@ from threading import Lock, Thread
 import cv2
 import openai
 from cv2 import VideoCapture, imencode
-from dotenv import load_dotenv
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema.messages import SystemMessage
 from langchain_community.chat_message_histories import ChatMessageHistory
@@ -14,9 +13,9 @@ from langchain_openai import ChatOpenAI
 from pyaudio import PyAudio, paInt16
 from speech_recognition import Microphone, Recognizer, UnknownValueError
 
+
+from dotenv import load_dotenv
 load_dotenv()
-
-
 class WebcamStream:
     def __init__(self):
         """
@@ -80,15 +79,18 @@ class WebcamStream:
             The latest frame from the webcam, either as a numpy array or as a
             b64 string.
         """
+        #let's try to avoid race conditions over the frame
         self.lock.acquire()#acquire the lock to avoid race conditions
         frame = self.frame.copy()#copy the frame to avoid race conditions
         self.lock.release()
 
+        #encode the frame as a b64 string if needed
         if encode:
             _, buffer = imencode(".jpeg", frame)
             return base64.b64encode(buffer)
-
+        #otherwise, return the frame as a numpy array
         return frame
+
 
     def stop(self):
         self.running = False
